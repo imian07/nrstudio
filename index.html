@@ -141,8 +141,7 @@
   .reveal.in{ opacity:1; transform:none; }
 
   @keyframes fadeUp{ from{ opacity:0; transform: translateY(16px); } to{ opacity:1; transform:none; } }
-  @keyframes floaty{ 0%,100%{ transform: rotateX(4deg) translateY(0); } 50%{ transform: rotateX(4deg) translateY(-10px); } }
-  @keyframes glowPulse{ 0%,100%{ opacity:.75; transform: translateX(-50%) scale(1); } 50%{ opacity:1; transform: translateX(-50%) scale(1.08); } }
+  @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
 
   /* staggered entrance - uses animation (not transition) so it never delays hover feedback */
   .pillar-grid .card.in{ animation: fadeUp .6s var(--ease) both; }
@@ -225,14 +224,8 @@
     white-space: nowrap;
   }
   .btn:active{ transform: scale(.97); }
-  .btn-primary{ position:relative; overflow:hidden; background: var(--accent); color: var(--accent-text); box-shadow: var(--shadow-1); }
+  .btn-primary{ background: var(--accent); color: var(--accent-text); box-shadow: var(--shadow-1); }
   .btn-primary:hover{ background: var(--accent-hover); box-shadow: var(--shadow-2); transform: translateY(-2px); }
-  .btn-primary::after{
-    content:""; position:absolute; top:0; left:-60%; width:40%; height:100%;
-    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
-    transform: skewX(-20deg); transition: left .6s var(--ease);
-  }
-  .btn-primary:hover::after{ left:120%; }
   .btn-ghost{ background: var(--glass-fill); color: var(--text-primary); border-color: var(--glass-border); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
   .btn-ghost:hover{ border-color: var(--hairline); }
   .btn-sm{ height:36px; padding:0 18px; font-size:14px; }
@@ -246,7 +239,7 @@
     position:absolute; top:-120px; left:50%; transform:translateX(-50%);
     width:1100px; max-width:180vw; height:640px; z-index:-1; pointer-events:none;
     background: radial-gradient(50% 50% at 50% 40%, var(--accent-soft), transparent 70%);
-    animation: glowPulse 8s ease-in-out infinite;
+    opacity: 0; animation: fadeIn 1.4s var(--ease) .1s both;
   }
   .hero .eyebrow{ animation: fadeUp .7s var(--ease) both; }
   .hero h1{
@@ -269,8 +262,10 @@
     background: var(--bg-soft); border-radius: var(--r-lg); border:1px solid var(--hairline);
     box-shadow: var(--shadow-2); overflow:hidden;
     transform: rotateX(4deg);
+    transition: transform .4s var(--ease), box-shadow .4s var(--ease);
+    will-change: transform;
   }
-  .mockup-stage .mockup{ animation: floaty 6s ease-in-out infinite; }
+  .mockup-stage:hover .mockup{ box-shadow: var(--shadow-2), 0 30px 80px rgba(0,0,0,0.12); }
   .mockup-bar{
     display:flex; align-items:center; gap:8px; padding: 14px 18px; background: var(--bg-soft-2);
     border-bottom:1px solid var(--hairline);
@@ -753,6 +748,24 @@
   document.getElementById('year').textContent = '© 2026 NRSTUDIO. Wszelkie prawa zastrzeżone.';
 
   var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var tiltStage = document.querySelector('.mockup-stage');
+  var tiltEl = tiltStage ? tiltStage.querySelector('.mockup') : null;
+  var canTilt = tiltEl && !prefersReduced && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (canTilt){
+    tiltStage.addEventListener('mousemove', function(e){
+      var rect = tiltEl.getBoundingClientRect();
+      var px = (e.clientX - rect.left) / rect.width - 0.5;
+      var py = (e.clientY - rect.top) / rect.height - 0.5;
+      var rotateY = px * 10;
+      var rotateX = 4 - py * 8;
+      tiltEl.style.transform = 'rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg)';
+    });
+    tiltStage.addEventListener('mouseleave', function(){
+      tiltEl.style.transform = '';
+    });
+  }
+
   if ('IntersectionObserver' in window && !prefersReduced){
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(e){
