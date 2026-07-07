@@ -179,23 +179,28 @@
   .contact-tiles .tile:nth-child(3).in{ animation-delay: .12s; }
   .contact-tiles .tile:nth-child(4).in{ animation-delay: .18s; }
 
-  /* ---------- navbar ---------- */
+  /* ---------- navbar (floating glass pill) ---------- */
   header.nav{
-    position: sticky; top:0; z-index: 100;
-    background: transparent;
-    transition: background .3s var(--ease), border-color .3s var(--ease), box-shadow .3s var(--ease);
-    border-bottom: 1px solid transparent;
-  }
-  header.nav.scrolled{
+    position: fixed; top:18px; left:50%; z-index: 100;
+    width: calc(100% - 40px); max-width: 1180px;
+    transform: translateX(-50%);
+    border-radius: var(--r-pill);
     background: var(--nav-fill);
     -webkit-backdrop-filter: var(--glass-blur);
     backdrop-filter: var(--glass-blur);
-    border-bottom: 1px solid var(--nav-border);
+    border: 1px solid var(--nav-border);
+    box-shadow: var(--shadow-1);
+    transition: max-width .5s var(--ease), top .4s var(--ease), box-shadow .4s var(--ease);
+  }
+  header.nav.scrolled{
+    top:12px; max-width: 900px;
+    box-shadow: var(--shadow-2);
   }
   .nav-inner{
     display:flex; align-items:center; justify-content:space-between;
-    height: 64px;
+    height: 58px; padding: 0 10px 0 20px;
   }
+  @media (max-width: 640px){ .nav-inner{ height:54px; padding: 0 8px 0 16px; } }
   .brand{ display:flex; align-items:center; gap:10px; font-family: var(--font-serif); font-weight:700; font-size:19px; letter-spacing:-0.01em; }
   .brand-mark{
     width:28px; height:28px; border-radius:8px; background: var(--inverted-fill);
@@ -229,9 +234,9 @@
   .menu-btn svg{ width:16px; height:16px; }
 
   .mobile-panel{
-    display:none; position:absolute; left:16px; right:16px; top:76px;
-    background: var(--glass-fill); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
-    border:1px solid var(--glass-border); border-radius: var(--r-md); box-shadow: var(--shadow-2);
+    display:none; position:absolute; left:0; right:0; top:calc(100% + 10px);
+    background: var(--nav-fill); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    border:1px solid var(--nav-border); border-radius: var(--r-md); box-shadow: var(--shadow-2);
     padding: 8px; flex-direction:column; gap:2px;
   }
   .mobile-panel.open{ display:flex; }
@@ -261,7 +266,7 @@
   .btn-link:hover svg{ transform: translateY(3px); }
 
   /* ---------- hero (centered) ---------- */
-  .hero{ padding: 96px 0 40px; text-align:center; position:relative; }
+  .hero{ padding: 128px 0 40px; text-align:center; position:relative; }
   .hero-glow{
     position:absolute; top:-140px; left:50%; transform:translateX(-50%);
     width:1000px; max-width:160vw; height:640px; z-index:-1; pointer-events:none;
@@ -508,7 +513,7 @@
 
   /* ---------- mobile-specific tightening ---------- */
   @media (max-width: 640px){
-    .hero{ padding-top:48px; }
+    .hero{ padding-top:96px; }
     .mockup-stage{ margin-top:48px; }
     .pillars{ padding-top:72px; }
     .process{ padding-top:80px; padding-bottom:24px; }
@@ -541,7 +546,7 @@
 </svg>
 
 <header class="nav" id="siteNav">
-  <div class="wrap nav-inner">
+  <div class="nav-inner">
     <a href="#" class="brand">
       <span class="brand-mark">NR</span>
       NRSTUDIO
