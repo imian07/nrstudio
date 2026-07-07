@@ -857,8 +857,7 @@
     var ctx = canvas.getContext('2d');
     var W, H, DPR, stars;
     var mouseX = -9999, mouseY = -9999;
-    var canRipple = !prefersReduced && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    var RADIUS = 130;
+    var RADIUS = 140;
 
     function themeColor(name, fallback){
       var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -881,6 +880,7 @@
           depth: Math.random() * 0.8 + 0.2,
           phase: Math.random() * Math.PI * 2,
           speed: Math.random() * 0.6 + 0.25,
+          driftR: Math.random() * 16 + 8,
           alpha: Math.random() * 0.35 + 0.15,
           accent: i % 4 === 0
         });
@@ -894,17 +894,20 @@
       for (var i = 0; i < stars.length; i++){
         var s = stars[i];
 
-        if (canRipple){
+        if (!prefersReduced){
+          var targetX = s.bx + Math.cos(t * 0.0003 * s.speed + s.phase) * s.driftR;
+          var targetY = s.by + Math.sin(t * 0.00022 * s.speed + s.phase) * s.driftR;
+
           var dx = s.x - mouseX, dy = s.y - mouseY;
           var dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < RADIUS && dist > 0.01){
             var force = (RADIUS - dist) / RADIUS;
-            var push = force * force * (2.4 * (0.4 + s.depth));
+            var push = force * force * (2.6 * (0.4 + s.depth));
             s.vx += (dx / dist) * push;
             s.vy += (dy / dist) * push;
           }
-          s.vx += (s.bx - s.x) * 0.025;
-          s.vy += (s.by - s.y) * 0.025;
+          s.vx += (targetX - s.x) * 0.03;
+          s.vy += (targetY - s.y) * 0.03;
           s.vx *= 0.9;
           s.vy *= 0.9;
           s.x += s.vx;
@@ -923,13 +926,16 @@
     }
 
     window.addEventListener('resize', resize);
-    if (canRipple){
+    if (!prefersReduced){
       window.addEventListener('mousemove', function(e){
         mouseX = e.clientX; mouseY = e.clientY;
-      });
+      }, { passive: true });
       window.addEventListener('mouseleave', function(){
         mouseX = -9999; mouseY = -9999;
       });
+      window.addEventListener('touchmove', function(e){
+        if (e.touches && e.touches[0]){ mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; }
+      }, { passive: true });
     }
 
     resize();
