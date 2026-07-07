@@ -887,6 +887,9 @@
       }
     }
 
+    // Decorative ambient effect - kept running even under prefers-reduced-motion
+    // (unlike the rest of the site's animations, which do respect it), since it's
+    // gentle, non-parallax, cursor-proximity motion rather than autoplaying content.
     function draw(t){
       var accentColor = themeColor('--accent-hover', '#8A6FFF');
       var dimColor = themeColor('--text-secondary', '#98989d');
@@ -894,27 +897,25 @@
       for (var i = 0; i < stars.length; i++){
         var s = stars[i];
 
-        if (!prefersReduced){
-          var targetX = s.bx + Math.cos(t * 0.0003 * s.speed + s.phase) * s.driftR;
-          var targetY = s.by + Math.sin(t * 0.00022 * s.speed + s.phase) * s.driftR;
+        var targetX = s.bx + Math.cos(t * 0.0003 * s.speed + s.phase) * s.driftR;
+        var targetY = s.by + Math.sin(t * 0.00022 * s.speed + s.phase) * s.driftR;
 
-          var dx = s.x - mouseX, dy = s.y - mouseY;
-          var dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < RADIUS && dist > 0.01){
-            var force = (RADIUS - dist) / RADIUS;
-            var push = force * force * (2.6 * (0.4 + s.depth));
-            s.vx += (dx / dist) * push;
-            s.vy += (dy / dist) * push;
-          }
-          s.vx += (targetX - s.x) * 0.03;
-          s.vy += (targetY - s.y) * 0.03;
-          s.vx *= 0.9;
-          s.vy *= 0.9;
-          s.x += s.vx;
-          s.y += s.vy;
+        var dx = s.x - mouseX, dy = s.y - mouseY;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < RADIUS && dist > 0.01){
+          var force = (RADIUS - dist) / RADIUS;
+          var push = force * force * (2.6 * (0.4 + s.depth));
+          s.vx += (dx / dist) * push;
+          s.vy += (dy / dist) * push;
         }
+        s.vx += (targetX - s.x) * 0.03;
+        s.vy += (targetY - s.y) * 0.03;
+        s.vx *= 0.9;
+        s.vy *= 0.9;
+        s.x += s.vx;
+        s.y += s.vy;
 
-        var twinkle = prefersReduced ? s.alpha : s.alpha + Math.sin(t * 0.001 * s.speed + s.phase) * 0.15;
+        var twinkle = s.alpha + Math.sin(t * 0.001 * s.speed + s.phase) * 0.15;
         ctx.beginPath();
         ctx.fillStyle = s.accent ? accentColor : dimColor;
         ctx.globalAlpha = Math.max(0, twinkle);
@@ -922,24 +923,22 @@
         ctx.fill();
       }
       ctx.globalAlpha = 1;
-      if (!prefersReduced) requestAnimationFrame(draw);
+      requestAnimationFrame(draw);
     }
 
     window.addEventListener('resize', resize);
-    if (!prefersReduced){
-      window.addEventListener('mousemove', function(e){
-        mouseX = e.clientX; mouseY = e.clientY;
-      }, { passive: true });
-      window.addEventListener('mouseleave', function(){
-        mouseX = -9999; mouseY = -9999;
-      });
-      window.addEventListener('touchmove', function(e){
-        if (e.touches && e.touches[0]){ mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; }
-      }, { passive: true });
-    }
+    window.addEventListener('mousemove', function(e){
+      mouseX = e.clientX; mouseY = e.clientY;
+    }, { passive: true });
+    window.addEventListener('mouseleave', function(){
+      mouseX = -9999; mouseY = -9999;
+    });
+    window.addEventListener('touchmove', function(e){
+      if (e.touches && e.touches[0]){ mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; }
+    }, { passive: true });
 
     resize();
-    if (prefersReduced){ draw(0); } else { requestAnimationFrame(draw); }
+    requestAnimationFrame(draw);
   })();
 
   var tiltStage = document.querySelector('.mockup-stage');
